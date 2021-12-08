@@ -1,0 +1,86 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+<h1 align="center">{% block header %}Posts{% endblock %}</h1>
+<div id="posts">
+  {% for post in posts %}
+  <div class="card border-dark">
+    <div class="card-header">
+    <div class="row">
+        <div class="col-6">
+            <a href="/posts/{{post.user.username}}">
+            <button type="button" class="btn btn-primary">
+            {{post.user.username}}
+            </button>
+            </a>
+        </div>
+        <div class="col-3"></div>
+        <div class="col-3">
+        {% if user.username == "Administrator" or user.id == post.author%}
+          <a href="/delete-post/{{post.id}}" class="dropdown-item"><button type="button" class="btn btn-dark btn-lg">Delete</button></a>
+        {% endif %}
+        </div>
+
+    </div>
+    </div>
+    <div class="card-body">
+      <div class="card-text">{{post.text}}</div>
+      <br />
+      <div class="collapse" id="comments-{{post.id}}">
+        <div class="card">
+          <div class="card-body" id="comments-expanded-{{post.id}}">
+            {% for comment in post.comments %}
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <a href="/posts/{{comment.user.username}}">
+                    {{comment.user.username}}
+                </a>: {{comment.text}}
+              </div>
+              <div>
+                <small class="text-muted"> {{comment.date_created}}</small>
+                {% if user.id == comment.author or user.id == post.author  or user.username == "Administrator"%}
+                    <a href="/delete-comment/{{comment.id}}" class="dropdown-item"><button type="button" class="btn btn-dark btn-block btn-lg">Delete</button></a>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    <br>
+      <p class="card-text">
+        {% if post.comments|length > 0 %}
+
+        <a data-bs-toggle="collapse" href="#comments-{{post.id}}" role="button">
+        <button type="submit" class="btn btn-dark btn-block btn-lg">
+          <small>View {{post.comments|length}} Comments</small>
+            </button>
+        </a>
+        {% else %}
+        <small class="text-muted">No Comments</small>
+        {% endif %}
+
+      </p>
+    <div>
+         <span id="likes-count-{{post.id}}">
+        {{ post.likes|length }}</span>
+        {% if user.id in post.likes|map(attribute="author")|list %}
+        <i class="fas fa-thumbs-up" id="like-button-{{post.id}}" onclick="like({{post.id}})"></i>
+        {% else %}
+        <i class="far fa-thumbs-up" id="like-button-{{post.id}}" onclick="like({{post.id}})"></i>
+        {% endif %}
+
+      </div>
+      <form class="input-group mb-3" method="POST" action="/create-comment/{{post.id}}">
+        <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
+        <button type="submit" class="btn btn-dark btn-block btn-lg">Comment</button>
+      </form>
+    </div>
+    <div class="card-footer text-muted">{{post.date_created}}</div>
+  </div>
+  </br > {% endfor %}
+</div>
+{% block footer %}
+<div align="center">
+  <a href="/create-post"><button type="button" class="btn btn-dark btn-block btn-lg">Create a Post</button></a>
+</div>
+{% endblock %} {% endblock %}
